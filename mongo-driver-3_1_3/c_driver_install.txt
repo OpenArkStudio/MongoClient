@@ -1,0 +1,43 @@
+libbson
+cd src\libbson\build
+cmake -G "Visual Studio 14 2015 Win64" "-DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver\windows\debug" "-DCMAKE_BUILD_TYPE=Debug" ..
+
+msbuild /p:Configuration=Debug ALL_BUILD.vcxproj
+msbuild /p:Configuration=Debug INSTALL.vcxproj
+
+c driver
+cd build
+cmake -G "Visual Studio 14 2015 Win64" "-DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver\windows\debug" "-DCMAKE_BUILD_TYPE=Debug" "-DCMAKE_PREFIX_PATH=G:\sharedir\mongo-c-driver\windows\debug" "-DENABLE_SSL=WINDOWS" "-DENABLE_SASL=SSPI" "-DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF" ..
+
+msbuild /p:Configuration=Debug ALL_BUILD.vcxproj
+msbuild /p:Configuration=Debug INSTALL.vcxproj
+
+
+libbson
+cd src\libbson\build
+cmake -G "Visual Studio 14 2015 Win64" "-DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver\windows\release" "-DCMAKE_BUILD_TYPE=Release" ..
+msbuild /p:Configuration=Release ALL_BUILD.vcxproj
+msbuild /p:Configuration=Release INSTALL.vcxproj
+
+c driver
+cd build
+cmake -G "Visual Studio 14 2015 Win64" "-DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver\windows\release" "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_PREFIX_PATH=G:\sharedir\mongo-c-driver\windows\release" "-DENABLE_SSL=WINDOWS" "-DENABLE_SASL=SSPI" "-DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF" ..
+
+msbuild /p:Configuration=Release ALL_BUILD.vcxproj
+msbuild /p:Configuration=Release INSTALL.vcxproj
+
+linux
+
+$ git clone https://github.com/mongodb/mongo-c-driver.git
+$ cd mongo-c-driver
+$ git checkout x.y.z  # To build a particular release
+#release
+./autogen.sh --with-libbson=bundled --disable-automatic-init-and-cleanup --with-snappy=bundled --enable-ssl=openssl --enable-sasl=yes --enable-static --prefix=/home/syz/Downloads/c-install/release
+#debug
+./autogen.sh --with-libbson=bundled --disable-automatic-init-and-cleanup --with-snappy=bundled --enable-ssl=openssl --enable-sasl=yes --enable-static --enable-debug --prefix=/home/syz/Downloads/c-install/debug
+$ make
+$ sudo make install
+
+./configure --disable-automatic-init-and-cleanup --with-libbson=bundled --with-snappy=bundled --enable-ssl=openssl --enable-sasl=yes --enable-static  --prefix=/home/syz/Downloads/c-install
+make
+make install

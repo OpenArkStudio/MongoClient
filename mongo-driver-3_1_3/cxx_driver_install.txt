@@ -1,0 +1,28 @@
+version:3.1.3
+support MongoDB version:2.4~3.4
+
+boost:1.65.0
+vs2015
+windows
+
+cd build
+cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver-1.7.0\windows\debug -DLIBMONGOC_DIR=G:\sharedir\mongo-c-driver-1.7.0\windows\debug -DLIBBSON_DIR=G:\sharedir\mongo-c-driver-1.7.0\windows\debug -DBSONCXX_POLY_USE_BOOST=1 -DBOOST_ROOT=G:\sharedir\boost -DMONGOCXX_ENABLE_SSL=ON -DBUILD_SHARED_LIBS=ON ..
+msbuild /p:Configuration=Debug ALL_BUILD.vcxproj
+msbuild /p:Configuration=Debug INSTALL.vcxproj
+
+cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=G:\sharedir\mongo-c-driver-1.7.0\windows\release -DLIBMONGOC_DIR=G:\sharedir\mongo-c-driver-1.7.0\windows\release -DLIBBSON_DIR=G:\sharedir\mongo-c-driver-1.7.0\windows\release -DBSONCXX_POLY_USE_BOOST=1 -DBOOST_ROOT=G:\sharedir\boost -DMONGOCXX_ENABLE_SSL=ON -DBUILD_SHARED_LIBS=ON ..
+msbuild /p:Configuration=Release ALL_BUILD.vcxproj
+msbuild /p:Configuration=Release INSTALL.vcxproj
+
+linux
+
+mongoc 1.8.0-rc0
+
+g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-11)
+
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/home/syz/Downloads/c-install/debug -DLIBMONGOC_DIR=/home/syz/Downloads/c-install/debug -DLIBBSON_DIR=/home/syz/Downloads/c-install/debug -DBSONCXX_POLY_USE_BOOST=1 -DBOOST_ROOT=/usr/local/boost -DMONGOCXX_ENABLE_SSL=ON -DBUILD_SHARED_LIBS=ON ..
+make && make install
+
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/syz/Downloads/c-install/release -DLIBMONGOC_DIR=/home/syz/Downloads/c-install/release -DLIBBSON_DIR=/home/syz/Downloads/c-install/release -DBSONCXX_POLY_USE_BOOST=1 -DBOOST_ROOT=/usr/local/boost -DMONGOCXX_ENABLE_SSL=ON -DBUILD_SHARED_LIBS=ON ..
+make && make install

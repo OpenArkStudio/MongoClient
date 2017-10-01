@@ -1,0 +1,11 @@
+prefix=/home/syz/Downloads/c-install/debug
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${exec_prefix}/include
+
+Name: libmongoc
+Description: The libmongoc MongoDB client library.
+Version: 1.8.0-rc0
+Requires: libbson-static-1.0
+Libs: -L${libdir} -lmongoc-static-1.0 -lsasl2   -lssl -lcrypto   -lrt -lz  
+Cflags: -I${includedir}/libmongoc-1.0 -DMONGOC_STATIC
