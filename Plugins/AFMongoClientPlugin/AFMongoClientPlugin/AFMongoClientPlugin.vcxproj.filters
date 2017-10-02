@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="AFCMongoDriver.cpp">
+      <Filter>Mongo</Filter>
+    </ClCompile>
+    <ClCompile Include="AFCMongoModule.cpp">
+      <Filter>Mongo</Filter>
+    </ClCompile>
+    <ClCompile Include="AFMongoClientPlugin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Mongo">
+      <UniqueIdentifier>{e0525a4a-6cce-4463-9a72-076f7b3d139c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AFCMongoDriver.h">
+      <Filter>Mongo</Filter>
+    </ClInclude>
+    <ClInclude Include="AFCMongoModule.h">
+      <Filter>Mongo</Filter>
+    </ClInclude>
+    <ClInclude Include="AFMongoClientPlugin.h" />
+  </ItemGroup>
+</Project>

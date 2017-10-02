@@ -1,0 +1,7 @@
+<XML>
+	<Plugin Name="AFMongoClientPlugin" Main="1"/>
+	<Plugin Name="AFMongoClientTutorialPlugin" Main="1"/>	
+
+	<APPID Name="555" />
+	<ConfigPath Name="../../" />
+</XML>
