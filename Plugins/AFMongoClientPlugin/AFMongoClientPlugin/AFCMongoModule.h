@@ -28,15 +28,15 @@ public:
 
     virtual AFIMongoDriver* GetMongoDriver();
     virtual bool AddMongoDBInfo(const std::string& strDBName, const std::string& strIpPort, const std::string& strUserName, const std::string&strPassword);
-    virtual bool Find(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::string>& listField, std::list<value_type>& listValue);
-    virtual bool Insert(const std::string& strCollection, const std::list<std::pair<std::string, value_type>>& listFieldValue);
-    virtual bool UnInsertSet(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::pair<std::string, value_type>>& listFieldValue);
-    virtual bool InsertSet(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::pair<std::string, value_type>>& listFieldValue);
-    virtual bool Delete(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, bool bDelOne = true);
+    virtual bool FindOne(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, std::map<std::string, AFCData>& xFiledValue);
+    virtual bool Insert(const std::string& strCollection, const std::list<std::pair<std::string, AFCData>>& listFieldValue);
+    virtual bool UnInsertSet(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, const std::list<std::pair<std::string, AFCData>>& listFieldValue);
+    virtual bool InsertSet(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, const std::list<std::pair<std::string, AFCData>>& listFieldValue);
+    virtual bool Delete(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, bool bDelOne = true);
 
 private:
-    bool GetValueFromBsonDoc(const bsoncxx::document::view& xDoc, const std::string& strField, value_type& xValue);
-    bool FillValueToDoc(bsoncxx::builder::stream::document& xDoc, const std::string& strField, const value_type& xValue);
+    bool GetValueFromBsonDoc(const bsoncxx::document::view& xDoc, const std::string& strField, AFIData& xValue);
+    bool FillValueToDoc(bsoncxx::builder::stream::document& xDoc, const std::string& strField, const AFIData& xValue);
 
 private:
     AFIMongoDriver* m_pMongoDriver;

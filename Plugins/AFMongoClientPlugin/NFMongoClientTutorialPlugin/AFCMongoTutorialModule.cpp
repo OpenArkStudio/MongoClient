@@ -27,10 +27,11 @@ bool AFCMongoTutorialModule::AfterInit()
 {
     m_pMongoModule->AddMongoDBInfo("ta", "localhost:27017", "", "");
     const std::string strCollection = "testCol";
-    std::list<std::pair<std::string, AFIMongoModule::value_type>> listFieldValue;
+    std::list<std::pair<std::string, AFCData>> listFieldValue;
+
     //insert
-    listFieldValue.push_back(std::make_pair("name", "syz3"));
-    listFieldValue.push_back(std::make_pair("age", (int64_t)19));
+    listFieldValue.push_back(std::make_pair("name", AFCData(ArkFrame::DT_STRING, "syz3")));
+    listFieldValue.push_back(std::make_pair("age", AFCData(ArkFrame::DT_INT64, (int64_t)19)));
     if(!m_pMongoModule->Insert(strCollection, listFieldValue))
     {
         std::cout << "insert failed" << std::endl;
@@ -42,8 +43,8 @@ bool AFCMongoTutorialModule::AfterInit()
 
     //set
     listFieldValue.clear();
-    listFieldValue.push_back(std::make_pair("age", (int64_t)77));
-    if(!m_pMongoModule->InsertSet(strCollection, std::make_pair("name", "syz2"), listFieldValue))
+    listFieldValue.push_back(std::make_pair("age", AFCData(ArkFrame::DT_INT64, (int64_t)77)));
+    if(!m_pMongoModule->InsertSet(strCollection, std::make_pair("name", AFCData(ArkFrame::DT_STRING, "syz2")), listFieldValue))
     {
         std::cout << "InsertSet failed" << std::endl;
     }
@@ -52,7 +53,7 @@ bool AFCMongoTutorialModule::AfterInit()
         std::cout << "InsertSet success" << std::endl;
     }
     //delete
-    if(!m_pMongoModule->Delete(strCollection, std::make_pair("age", 66), true))
+    if(!m_pMongoModule->Delete(strCollection, std::make_pair("age", AFCData(ArkFrame::DT_INT64, (int64_t)66)), true))
     {
         std::cout << "delete failed" << std::endl;
     }
@@ -61,19 +62,19 @@ bool AFCMongoTutorialModule::AfterInit()
         std::cout << "delete success" << std::endl;
     }
     //find
-    std::list<std::string> listField;
-    listField.push_back("age");
-    std::list<AFIMongoModule::value_type> listValue;
-    if(!m_pMongoModule->Find(strCollection, std::make_pair("name", "syz2"), listField, listValue))
+    std::map< std::string, AFCData > xFindlistFieldValue;
+    xFindlistFieldValue["age"] = AFCData(ArkFrame::DT_INT64, 0);
+
+    if(!m_pMongoModule->FindOne(strCollection, std::make_pair("name", AFCData(ArkFrame::DT_STRING, "syz2")), xFindlistFieldValue))
     {
         std::cout << "Find failed" << std::endl;
     }
     else
     {
         std::cout << "Find success" << std::endl;
-        for(auto &it : listValue)
+        for(auto &it : xFindlistFieldValue)
         {
-            std::cout << boost::get<int64_t>(it) << std::endl;
+            std::cout << it.second.GetInt64() << std::endl;
         }
     }
 

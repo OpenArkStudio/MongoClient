@@ -65,18 +65,17 @@ bool AFCMongoModule::AddMongoDBInfo(const std::string& strDBName, const std::str
     return true;
 }
 
-bool AFCMongoModule::Find(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::string>& listField, std::list<value_type>& listValue)
+bool AFCMongoModule::FindOne(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, std::map<std::string, AFCData>& xFiledValue)
 {
-    if(listField.size() == 0)
+    if(xFiledValue.size() == 0)
     {
         std::cout << "field size = 0" << std::endl;
         return true;
     }
 
     mongocxx::options::find xOpts{};
-    const value_type& xValue = xKeyValue.second;
+    const AFCData xValue = xKeyValue.second;
     bsoncxx::builder::stream::document xOptsDocument;
-
     bsoncxx::builder::stream::document xFilter;
 
     if(!FillValueToDoc(xFilter, xKeyValue.first, xValue))
@@ -85,11 +84,16 @@ bool AFCMongoModule::Find(const std::string& strCollection, const std::pair<std:
         return false;
     }
 
-    for(auto &it : listField)
+    bool bHaveID = false;
+    for(auto &it : xFiledValue)
     {
-        xOptsDocument << it << 1;
+        xOptsDocument << it.first << 1;
     }
-    xOptsDocument << "_id" << 0;
+
+    if(xFiledValue.find("_id") == xFiledValue.end())
+    {
+        xOptsDocument << "_id" << 0;
+    }
 
     xOpts.projection(xOptsDocument.view());
     //opts.max_time();  超时时间 毫秒，默认1s钟
@@ -104,22 +108,23 @@ bool AFCMongoModule::Find(const std::string& strCollection, const std::pair<std:
     for(auto &it : listRusult)
     {
         std::cout << bsoncxx::to_json(it.view()) << std::endl;
-        for(auto &itField : listField)
+        for(auto &itField : xFiledValue)
         {
-            value_type xValue;
-            if(!GetValueFromBsonDoc(it.view(), itField, xValue))
+            if(!GetValueFromBsonDoc(it.view(), itField.first, itField.second))
             {
                 std::cout << "GetValueFromBsonDoc error" << std::endl;
                 return false;
             }
-            listValue.push_back(xValue);
         }
+
+        //peek one
+        break;
     }
 
     return true;
 }
 
-bool AFCMongoModule::Insert(const std::string& strCollection, const std::list<std::pair<std::string, value_type>>& listFieldValue)
+bool AFCMongoModule::Insert(const std::string& strCollection, const std::list<std::pair<std::string, AFCData>>& listFieldValue)
 {
     bsoncxx::builder::stream::document xDocument{};
     for(auto &it : listFieldValue)
@@ -134,7 +139,7 @@ bool AFCMongoModule::Insert(const std::string& strCollection, const std::list<st
     //return true;
 }
 
-bool AFCMongoModule::UnInsertSet(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::pair<std::string, value_type>>& listFieldValue)
+bool AFCMongoModule::UnInsertSet(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, const std::list<std::pair<std::string, AFCData>>& listFieldValue)
 {
     bsoncxx::builder::stream::document xFilter;
     if(!FillValueToDoc(xFilter, xKeyValue.first, xKeyValue.second))
@@ -161,7 +166,7 @@ bool AFCMongoModule::UnInsertSet(const std::string& strCollection, const std::pa
     return m_pMongoDriver->UpdateOne(strCollection, xFilter.view(), xDocument.view(), xOptions);
 }
 
-bool AFCMongoModule::InsertSet(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, const std::list<std::pair<std::string, value_type>>& listFieldValue)
+bool AFCMongoModule::InsertSet(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, const std::list<std::pair<std::string, AFCData>>& listFieldValue)
 {
     bsoncxx::builder::stream::document xFilter;
     if(!FillValueToDoc(xFilter, xKeyValue.first, xKeyValue.second))
@@ -188,7 +193,7 @@ bool AFCMongoModule::InsertSet(const std::string& strCollection, const std::pair
     return m_pMongoDriver->UpdateOne(strCollection, xFilter.view(), xDocument.view(), xOptions);
 }
 
-bool AFCMongoModule::Delete(const std::string& strCollection, const std::pair<std::string, value_type>& xKeyValue, bool bDelOne/* = true*/)
+bool AFCMongoModule::Delete(const std::string& strCollection, const std::pair<std::string, AFCData>& xKeyValue, bool bDelOne/* = true*/)
 {
     bsoncxx::builder::stream::document xFilter;
     if(!FillValueToDoc(xFilter, xKeyValue.first, xKeyValue.second))
@@ -217,29 +222,38 @@ bool AFCMongoModule::Delete(const std::string& strCollection, const std::pair<st
     return true;
 }
 
-bool AFCMongoModule::GetValueFromBsonDoc(const bsoncxx::document::view& xDoc, const std::string& strField, value_type& xValue)
+bool AFCMongoModule::GetValueFromBsonDoc(const bsoncxx::document::view& xDoc, const std::string& strField, AFIData& xValue)
 {
     auto xDataType = xDoc[strField].type();
     switch(xDataType)
     {
 
-    //case bsoncxx::type::k_bool:
-    //    xValue = xDoc[strField].get_bool().value;
-    //    break;
-    //case bsoncxx::type::k_timestamp:
-    //    xValue = (int64_t)(xDoc[strField].get_timestamp().timestamp);
-    //    break;
+    case bsoncxx::type::k_bool:
+        xValue.SetBool(xDoc[strField].get_bool().value);
+        break;
+    case bsoncxx::type::k_timestamp:
+        xValue.SetInt64((int64_t)(xDoc[strField].get_timestamp().timestamp));
+        break;
     case bsoncxx::type::k_int64:
-        xValue = xDoc[strField].get_int64().value;
+        {
+            if(xValue.GetType() == DT_OBJECT)
+            {
+                xValue.SetObject(xDoc[strField].get_int64().value);
+            }
+            else
+            {
+                xValue.SetInt64(xDoc[strField].get_int64().value);
+            }
+        }
         break;
     case bsoncxx::type::k_int32:
-        xValue = (int64_t)xDoc[strField].get_int32().value;
+        xValue.SetInt(xDoc[strField].get_int32().value);
         break;
     case bsoncxx::type::k_double:
-        xValue = xDoc[strField].get_double().value;
+        xValue.SetDouble(xDoc[strField].get_double().value);
         break;
     case bsoncxx::type::k_utf8:
-        xValue = xDoc[strField].get_utf8().value.to_string();
+        xValue.SetString(xDoc[strField].get_utf8().value.to_string().c_str());
         break;
     //case bsoncxx::type::k_binary:
     //    xDoc[strField].get_binary();
@@ -251,32 +265,58 @@ bool AFCMongoModule::GetValueFromBsonDoc(const bsoncxx::document::view& xDoc, co
     return true;
 }
 
-bool AFCMongoModule::FillValueToDoc(bsoncxx::builder::stream::document& xDoc, const std::string& strField, const value_type& xValue)
+bool AFCMongoModule::FillValueToDoc(bsoncxx::builder::stream::document& xDoc, const std::string& strField, const AFIData& xValue)
 {
-    if(xValue.type() == typeid(int64_t))
+    switch(xValue.GetType())
     {
-        xDoc << strField << boost::get<int64_t>(xValue);
-    }
-    else if(xValue.type() == typeid(double))
-    {
-        xDoc << strField << boost::get<double>(xValue);
-    }
-    else if(xValue.type() == typeid(std::string))
-    {
-        xDoc << strField << boost::get<std::string>(xValue);
-    }
-    else if(xValue.type() == typeid(int))
-    {
-        xDoc << strField << boost::get<int>(xValue);
-    }
-    //else if(xValue.type() == typeid(bool))
-    //{
-    //    xDoc << strField << boost::get<bool>(xValue);
-    //}
-    else
-    {
-        std::cout << "Unknow key value type" << std::endl;
-        return false;
+    case AF_DATA_TYPE::DT_BOOLEAN:
+        {
+            xDoc << strField << xValue.GetBool();
+        }
+        break;
+    case AF_DATA_TYPE::DT_INT:
+        {
+            xDoc << strField << (int32_t)xValue.GetInt();
+        }
+        break;
+    case AF_DATA_TYPE::DT_INT64:
+        {
+            xDoc << strField << xValue.GetInt64();
+        }
+        break;
+    case AF_DATA_TYPE::DT_FLOAT:
+        {
+            xDoc << strField << xValue.GetFloat();
+        }
+        break;
+    case AF_DATA_TYPE::DT_DOUBLE:
+        {
+            xDoc << strField << xValue.GetDouble();
+        }
+        break;
+    case AF_DATA_TYPE::DT_STRING:
+        {
+            xDoc << strField << xValue.GetString();
+        }
+        break;
+    case AF_DATA_TYPE::DT_OBJECT:
+        {
+            xDoc << strField << (int64_t)xValue.GetObject().n64Value;
+        }
+        break;
+    case AF_DATA_TYPE::DT_POINTER:
+    case AF_DATA_TYPE::DT_USERDATA:
+    case AF_DATA_TYPE::DT_TABLE:
+        {
+            std::cout << "Cannot save key value type " << strField  << std::endl;
+            return false;
+        }
+    default:
+        {
+            std::cout << "Unknow key value type " << strField << std::endl;
+            return false;
+        }
+        break;
     }
     return true;
 }
