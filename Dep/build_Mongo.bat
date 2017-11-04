@@ -9,11 +9,11 @@ if exist boost (rd boost /q /s)
 
 REM git config --global http.sslVerify false
 set GIT_SSL_NO_VERIFY=true
-REM git clone --recursive -b boost-1.65.0 https://github.com/boostorg/boost.git
+git clone --recursive -b boost-1.65.0 https://github.com/boostorg/boost.git
 
-git clone -b boost-1.65.0 https://github.com/boostorg/boost.git
-git submodule init
-git submodule update
+REM git clone -b boost-1.65.0 https://github.com/boostorg/boost.git
+REM git submodule init
+REM git submodule update
 
 cd boost
 call .\bootstrap.bat
